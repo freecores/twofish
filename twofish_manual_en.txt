@@ -196,7 +196,7 @@ in_key_up_ter128 and in_key_down_ter128 are the two round keys. Note that up and
 names are given to keys according to the diagram given in Twofish spec. You don't need
 to worry about it, keys follow the same naming convention throughout the whole design.
 Finally, out1_ter128, out1_ter228, out3_ter128 and out4_ter128 are the 32 bit outputs
-of the encryption round. 
+of the encryption round. (ter128 comes from Twofish_Encryption_Round128)
 
 IMPORTANT NOTICE: the output swapping is taking place IN the component. YOU HAVE TO undo
 the last swap after the 16th round. 
@@ -222,6 +222,7 @@ The interface is as follows:
 	end twofish_decryption_round128;
 
 As in twofish_encryption_round128 component, the ports are quite self-explanatory. 
+(tdr128 comes from Twofish_Decryption_Round128)
 
 IMPORTANT NOTICE: as in twofish_encryption_round128, inside the component the output
 swapping is taking place. YOU HAVE TO undo the last swap after the 16th round.
