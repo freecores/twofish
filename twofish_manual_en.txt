@@ -9,9 +9,6 @@ This document is under the GPL. See file COPYING for licence details.
 3. Testbenches
 4. Misc + Tips
 
-NOTE (April 2006): for the time being the 256 bit key size functionality is not 
-implemented. Testing and debugging is very time consuming. Bare with me :)
-
 1. INTRODUCTION
 ===============
 
@@ -52,8 +49,12 @@ In the file you'll find the below main components:
 	10) twofish_whit_keysched192
 	11) twofish_encryption_round192
 	12) twofish_decryption_round192
+	13) twofish_S256
+	14) twofish_keysched256
+	15) twofish_whit_keysched256
+	16) twofish_encryption_round256
+	17) twofish_decryption_round256
 
-(NOTE: 256 bit components are not implemented yet).
 
 You'll also find all the other components that the above depend on, but they are not
 important in building the cipher - except perhaps if you want to study the structure
@@ -196,7 +197,7 @@ in_key_up_ter128 and in_key_down_ter128 are the two round keys. Note that up and
 names are given to keys according to the diagram given in Twofish spec. You don't need
 to worry about it, keys follow the same naming convention throughout the whole design.
 Finally, out1_ter128, out1_ter228, out3_ter128 and out4_ter128 are the 32 bit outputs
-of the encryption round. (ter128 comes from Twofish_Encryption_Round128)
+of the encryption round (ter128 comes from Twofish_Encryption_Round128). 
 
 IMPORTANT NOTICE: the output swapping is taking place IN the component. YOU HAVE TO undo
 the last swap after the 16th round. 
@@ -222,7 +223,7 @@ The interface is as follows:
 	end twofish_decryption_round128;
 
 As in twofish_encryption_round128 component, the ports are quite self-explanatory. 
-(tdr128 comes from Twofish_Decryption_Round128)
+(tdr128 comes from Twofish_Decryption_Round128).
 
 IMPORTANT NOTICE: as in twofish_encryption_round128, inside the component the output
 swapping is taking place. YOU HAVE TO undo the last swap after the 16th round.
@@ -235,9 +236,15 @@ Components
 	10) twofish_whit_keysched192
 	11) twofish_encryption_round192
 	12) twofish_decryption_round192
+	13) twofish_S256
+	14) twofish_keysched256
+	15) twofish_whit_keysched256
+	16) twofish_encryption_round256
+	17) twofish_decryption_round256
 
 work exactly as their 128 bit counterparts. The only difference is the third S that
-is provided by twofish_S192 and needed by some of the rest of them. I.e:
+is provided by twofish_S192 and needed by some of the rest of them, and the fourth
+S that is provided by twofish_S256. I.e:
 
 	entity twofish_S192 is
 	port	(
@@ -248,7 +255,9 @@ is provided by twofish_S192 and needed by some of the rest of them. I.e:
 			);
 	end twofish_S192;
 
-which provide a third S that is used in twofish encryption and decryption rounds.
+which provide a third S that is used in twofish encryption and decryption rounds for
+192 bits and the fourth S that is provided from the twofish_S256 is used by the
+twofish encryption and decryption rounds for 256 bits.
 Every IMPORTANT NOTICE that exist for the 128 bit components, are valid for
 these components too.
 
@@ -317,15 +326,16 @@ multiplications in rolled-out form of every 64 bit input. In other terms, in_rs1
 is split up in two 64 bit chunks, and each one is driven in it's respective 
 multipliers. The result of the first multipliers is driven to out_Sfirst, the result
 of the second to out_Ssecond. Respectively for reed_solomon192 the result of the
-third multiplier is driven to out_Sthird. Every multiplication needs it's 
+third multiplier is driven to out_Sthird and for reed_solomon256 the result of the
+fourth multiplier is driven to out_Sfourth. Every multiplication needs it's 
 multipliers (note that it is not a single mul, but a group of them because its
-a matrix multiplication) so in the first component we need two groups of muls and
-in the second component three groups of them. 
+a matrix multiplication) so in the first component we need two groups of muls,
+in the second component three groups of them and in the third we need four. 
 
-If you had to implement cipher with 128 and 192 sizes you'd have to implement both
-reed solomon components which total in 5 groups of multipliers. One solution would
-be to create a reed solomon that would take a single 64 bit input and procude a 
-single 32 bit output. For example:
+If you had to implement cipher with 128 and 192 sizes for example, you'd have to 
+implement both reed solomon components which total in 5 groups of multipliers. 
+One solution would be to create a reed solomon that would take a single 64 bit 
+input and procude a single 32 bit output. For example:
 
 	entity reed_solomon is
 	port	(
@@ -336,10 +346,10 @@ single 32 bit output. For example:
 
 
 Then you would divide the key into 64 bit chunks (128 bit in 2 chunks, 192 bit 
-in 3 chunks) and provide them to the component sequentially. The results of
-the reed_solomon could be stored in a sort of RAM. That way you may slow down
-the process but you get to implement only one group of multipliers and you gain
-a lot in space. 
+in 3 chunks and 256 bits in 4 chunks) and provide them to the component 
+sequentially. The results of the reed_solomon could be stored in a sort of RAM. 
+That way you may slow down the process but you get to implement only one group 
+of multipliers and you gain a lot in space. 
 
 The same goes for the whitening keys components. In the whitening components 
 the function h is impemented 16 times (2 h functions for each pair of keys,
