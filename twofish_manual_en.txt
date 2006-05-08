@@ -352,7 +352,7 @@ That way you may slow down the process but you get to implement only one group
 of multipliers and you gain a lot in space. 
 
 The same goes for the whitening keys components. In the whitening components 
-the function h is impemented 16 times (2 h functions for each pair of keys,
+the function h is impemented 8 times (2 h functions for each pair of keys,
 for the first 8 keys - K0..7). You could follow the above example and implement
 a component that accepts a 64 bit input (key chunk, every M is 32 bit, you need
 2 Ms for every h function) and produce a single 32 bit key. Thus,  you can 
